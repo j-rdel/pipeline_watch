@@ -31,4 +31,5 @@ Thumbs.db
 
 # Logs / reports
 *.log
+!fixtures/logs/*.log
 reports/

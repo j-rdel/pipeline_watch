@@ -1,0 +1,7 @@
+2026-08-29T10:00:00.123Z Setup Python 3.12
+2026-08-29T10:00:02.456Z Install dependencies
+2026-08-29T10:00:08.789Z uv run ruff check .
+2026-08-29T10:00:11.000Z src/pipeline_watch/foo.py:12:81: E501 Line too long (108 > 100)
+2026-08-29T10:00:11.001Z src/pipeline_watch/bar.py:7:15: F401 `os` imported but unused
+2026-08-29T10:00:11.500Z Found 2 errors.
+2026-08-29T10:00:11.501Z Error: Process completed with exit code 1.
