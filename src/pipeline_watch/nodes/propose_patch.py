@@ -1,28 +1,43 @@
-"""propose_patch — only runs on the autofix path.
+"""propose_patch — LLM-generated patch, only on the autofix path.
 
-Stub: emits a canned ruff-format diff. Real impl (task #5) has the LLM
-generate a unified diff constrained to files on PW_ALLOWLIST_PATHS.
+The graph only routes here when decide_action returned "autofix", but this
+node still short-circuits when the LLM reports rationale='not-mechanical' —
+that is treated as "no patch to apply" and downstream open_pr will skip.
 """
 
 from __future__ import annotations
 
+from pipeline_watch import llm as llm_mod
+from pipeline_watch.prompts import PROPOSE_PATCH_SYSTEM
 from pipeline_watch.schema import ProposedPatch
 from pipeline_watch.state import TriageState
 
 
+def _build_user_message(state: TriageState) -> str:
+    ctx = state["context"]
+    classification = state["classification"]
+    lines = [
+        f"Classification: {classification.label}",
+        "",
+        "Failed job logs:",
+    ]
+    for job in ctx["failed_jobs"]:
+        lines.append(f"\n--- {job['name']} ---")
+        lines.append(job["logs"])
+    return "\n".join(lines)
+
+
 def propose_patch(state: TriageState) -> dict:
-    patch = ProposedPatch(
-        file_path="src/foo.py",
-        rationale="Line 12 exceeds ruff line-length limit (108 > 100).",
-        diff=(
-            "--- a/src/foo.py\n"
-            "+++ b/src/foo.py\n"
-            "@@ -10,3 +10,4 @@\n"
-            " def something():\n"
-            "-    result = some_very_long_expression_that_goes_way_past_the_limit(a, b, c)\n"
-            "+    result = some_very_long_expression_that_goes_way_past_the_limit(\n"
-            "+        a, b, c\n"
-            "+    )\n"
-        ),
-    )
+    try:
+        patch: ProposedPatch = llm_mod.structured_output(
+            ProposedPatch,
+            system=PROPOSE_PATCH_SYSTEM,
+            user=_build_user_message(state),
+        )
+    except Exception:
+        # LLM failed to produce a valid patch — that's fine, autofix is
+        # opportunistic. Downstream open_pr handles None by skipping.
+        return {"proposed_patch": None}
+    if patch.rationale.strip().lower() == "not-mechanical" or not patch.diff.strip():
+        return {"proposed_patch": None}
     return {"proposed_patch": patch}
