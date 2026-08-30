@@ -1,29 +1,32 @@
-"""retrieve_runbook — parallel branch B.
+"""retrieve_runbook — parallel branch B, RAG-backed.
 
-Stub: returns canned snippets. Real impl (task #6) does FAISS retrieval over
-docs/runbook/*.md using fastembed embeddings.
+Queries the FAISS index built over docs/runbook/*.md and returns the top-k
+chunks as plain strings. The synthesize node uses them as context for the
+diagnosis — they are NOT cited as Evidence (evidence must come from the log).
 """
 
 from __future__ import annotations
 
+from pipeline_watch import rag as rag_mod
 from pipeline_watch.state import TriageState
+
+_TOP_K = 2
+_MAX_CHUNK_CHARS = 800
+
+
+def _build_query(state: TriageState) -> str:
+    ctx = state["context"]
+    lines = [f"Workflow {ctx['workflow_name']} on {ctx['head_branch']}: failed."]
+    for job in ctx["failed_jobs"]:
+        lines.append(f"Job {job['name']}: {job['logs'][:500]}")
+    return "\n".join(lines)
 
 
 def retrieve_runbook(state: TriageState) -> dict:
-    ctx = state["context"]
-    logs = "\n".join(job["logs"] for job in ctx["failed_jobs"])
-
-    if "E501" in logs or "ruff" in logs:
-        snippets = [
-            "Lint failures (ruff): allowed autofix — run `ruff format` "
-            "and commit. Do NOT touch business logic.",
-        ]
-    elif "AssertionError" in logs:
-        snippets = [
-            "Test failures: never autofix. Post a diagnosis with the failing "
-            "test name and the exception traceback so the author can react.",
-        ]
-    else:
-        snippets = ["No matching runbook entry for this failure signature."]
-
+    index = rag_mod.get_index()
+    chunks = index.query(_build_query(state), k=_TOP_K)
+    snippets = [
+        (f"[{c.source} — {c.heading}] " + c.body[:_MAX_CHUNK_CHARS])
+        for c in chunks
+    ]
     return {"runbook_snippets": snippets}
