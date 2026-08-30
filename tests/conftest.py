@@ -14,7 +14,9 @@ from typing import Any
 import pytest
 
 from pipeline_watch import llm as llm_mod
+from pipeline_watch import memory as memory_mod
 from pipeline_watch import rag as rag_mod
+from pipeline_watch.memory import IncidentStore
 from pipeline_watch.nodes.synthesize_diagnosis import DiagnosisOutput
 from pipeline_watch.rag import Chunk
 from pipeline_watch.schema import (
@@ -142,6 +144,15 @@ def _stub_rag(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -
         return
     monkeypatch.setattr(rag_mod, "get_index", lambda: _FakeRunbookIndex())
     yield
+
+
+@pytest.fixture(autouse=True)
+def _isolated_memory(tmp_path, monkeypatch: pytest.MonkeyPatch) -> Any:
+    """Give every test a fresh SQLite so history from other tests can't leak in."""
+
+    store = IncidentStore(db_path=tmp_path / "incidents.sqlite")
+    monkeypatch.setattr(memory_mod, "get_store", lambda: store)
+    yield store
 
 
 def pytest_configure(config):
