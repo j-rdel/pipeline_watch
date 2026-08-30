@@ -1,0 +1,13 @@
+{
+  "total_count": 1,
+  "jobs": [
+    {
+      "id": 7001,
+      "name": "lint",
+      "conclusion": "failure",
+      "status": "completed",
+      "started_at": "2026-08-30T00:00:00Z",
+      "completed_at": "2026-08-30T00:00:15Z"
+    }
+  ]
+}
