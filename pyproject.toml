@@ -1,5 +1,5 @@
 [project]
-name = "pipeline-watch"
+name = "pipeline_watch"
 version = "0.1.0"
 description = "LangGraph agent that triages failed GitHub Actions runs and either opens a fix PR or posts a diagnosis."
 readme = "README.md"
@@ -26,7 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
-pipeline-watch = "pipeline_watch.cli:app"
+pipeline_watch = "pipeline_watch.cli:app"
 
 [dependency-groups]
 dev = [

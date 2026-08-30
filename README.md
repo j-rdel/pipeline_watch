@@ -12,7 +12,7 @@ histórico e decide entre **abrir um PR de correção** (nunca faz merge) ou
 ## Status
 
 🚧 Em desenvolvimento. Consulte o
-[quadro Kanban](https://github.com/users/jardelurban/projects) e as
+[quadro Kanban](https://github.com/users/j-rdel/projects) e as
 issues do repositório para acompanhar o progresso.
 
 ## Requisitos
@@ -37,10 +37,10 @@ cp .env.example .env
 
 ```sh
 # Modo fixture (sem rede, usa logs gravados em fixtures/)
-uv run pipeline-watch triage --run-id 42 --source fixture
+uv run pipeline_watch triage --run-id 42 --source fixture
 
 # Modo GitHub real (requer GITHUB_TOKEN e GITHUB_REPO no .env)
-uv run pipeline-watch triage --run-id 987654321 --source github
+uv run pipeline_watch triage --run-id 987654321 --source github
 ```
 
 Sem `--post` ou com `PW_DRY_RUN=true`, a aplicação **nunca** abre PR nem posta
