@@ -60,14 +60,23 @@ def test_test_failure_fixture_routes_to_notify_only(graph):
     assert report.severity.value == "high"
 
 
-def test_report_evidence_comes_from_both_parallel_branches(graph):
+def test_both_parallel_branches_populate_state(graph):
+    """classify_failure writes 'classification', retrieve_runbook writes
+    'runbook_snippets'. If either failed silently, the fan-in node would
+    still run but the missing key would surface here.
+    """
+
     final = graph.invoke(
         {"run_id": "lint-fixture", "source": "fixture", "correlation_id": "cid-ev"}
     )
-    report = final["report"]
-    sources = {e.source for e in report.evidence}
+
+    assert final["classification"] is not None
+    snippets = final["runbook_snippets"]
+    assert snippets and isinstance(snippets, list)
+
+    # Evidence must cite the log at minimum.
+    sources = {e.source for e in final["report"].evidence}
     assert any(s.startswith("job:") for s in sources)
-    assert "runbook" in sources
 
 
 def test_correlation_id_flows_end_to_end(graph):

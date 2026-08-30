@@ -1,37 +1,37 @@
-"""classify_failure — parallel branch A.
+"""classify_failure — LLM node, parallel branch A.
 
-Stub: returns a canned Classification. Real impl (task #5) calls Ollama with
-structured output constrained to the Classification schema.
+Feeds the failing job logs to Ollama with structured output constrained to
+Classification. The heuristic stub from the skeleton phase is gone.
 """
 
 from __future__ import annotations
 
-from pipeline_watch.schema import Classification, FailureClass
+from pipeline_watch import llm as llm_mod
+from pipeline_watch.prompts import CLASSIFY_SYSTEM
+from pipeline_watch.schema import Classification
 from pipeline_watch.state import TriageState
 
 
-def classify_failure(state: TriageState) -> dict:
+def _build_user_message(state: TriageState) -> str:
     ctx = state["context"]
-    logs = "\n".join(job["logs"] for job in ctx["failed_jobs"])
+    lines = [
+        f"Repository: {ctx['repository']}",
+        f"Workflow: {ctx['workflow_name']}",
+        f"Branch: {ctx['head_branch']}",
+        f"Event: {ctx['event']}",
+        "",
+        "Failed job logs:",
+    ]
+    for job in ctx["failed_jobs"]:
+        lines.append(f"\n--- {job['name']} ---")
+        lines.append(job["logs"])
+    return "\n".join(lines)
 
-    # Placeholder heuristic — real impl uses the LLM.
-    if "E501" in logs or "ruff" in logs:
-        label = FailureClass.LINT
-        reasoning = "Log mentions ruff / E501, classic lint failure."
-        confidence = 0.9
-    elif "AssertionError" in logs or "FAILED" in logs:
-        label = FailureClass.TEST_FAILURE
-        reasoning = "Log shows AssertionError or FAILED, treating as test failure."
-        confidence = 0.75
-    else:
-        label = FailureClass.UNKNOWN
-        reasoning = "No strong signal detected in stub heuristic."
-        confidence = 0.3
 
-    return {
-        "classification": Classification(
-            label=label,
-            confidence=confidence,
-            reasoning=reasoning,
-        )
-    }
+def classify_failure(state: TriageState) -> dict:
+    result: Classification = llm_mod.structured_output(
+        Classification,
+        system=CLASSIFY_SYSTEM,
+        user=_build_user_message(state),
+    )
+    return {"classification": result}
