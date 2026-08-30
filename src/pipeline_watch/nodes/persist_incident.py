@@ -1,13 +1,15 @@
-"""persist_incident — assemble the final IncidentReport from the shared state.
+"""persist_incident — assemble the final IncidentReport and record it in memory.
 
-Stub: just builds the report and returns it in state. Real impl (task #7)
-also writes to SQLite so the flakiness estimator can learn from history.
+Records one row per FAILED job so the flakiness estimator can key on signature.
+If the same run had two failed jobs with different signatures, both count for
+their respective signature groups.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
+from pipeline_watch import memory as memory_mod
 from pipeline_watch.schema import Classification, IncidentReport, Severity
 from pipeline_watch.state import TriageState
 
@@ -15,6 +17,8 @@ from pipeline_watch.state import TriageState
 def persist_incident(state: TriageState) -> dict:
     ctx = state["context"]
     classification: Classification = state["classification"]
+    decision = state["decision"]
+
     report = IncidentReport(
         run_id=ctx["run_id"],
         workflow=ctx["workflow_name"],
@@ -28,7 +32,20 @@ def persist_incident(state: TriageState) -> dict:
         suggested_action=state["suggested_action"],
         severity=Severity(state["severity"]),
         proposed_patch=state.get("proposed_patch"),
-        human_approval_required=(state["decision"] == "notify_only"),
+        human_approval_required=(decision == "notify_only"),
         correlation_id=state.get("correlation_id", ctx["run_id"]),
     )
+
+    store = memory_mod.get_store()
+    for job in ctx["failed_jobs"]:
+        signature = memory_mod.signature_from_logs(job["logs"])
+        store.record(
+            run_id=ctx["run_id"],
+            workflow=ctx["workflow_name"],
+            job_name=job["name"],
+            error_signature=signature,
+            outcome=decision,
+            decision=decision,
+        )
+
     return {"report": report}
