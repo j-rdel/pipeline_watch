@@ -74,18 +74,18 @@ def _fake_structured_output(schema, *, system: str, user: str):  # noqa: ANN001
             suggested_action="Run `ruff format` on foo.py and commit.",
         )
     if schema is ProposedPatch:
+        # Path chosen to sit inside the default PolicyGate allowlist so
+        # unit tests exercise the happy autofix path. Adversarial tests
+        # override this fake to return a rejected path.
         return ProposedPatch(
-            file_path="src/pipeline_watch/foo.py",
-            rationale="Fix ruff E501 by wrapping the long expression.",
+            file_path=".github/workflows/ci.yml",
+            rationale="Fix trailing whitespace flagged by ruff on the CI workflow.",
             diff=(
-                "--- a/src/pipeline_watch/foo.py\n"
-                "+++ b/src/pipeline_watch/foo.py\n"
-                "@@ -10,3 +10,4 @@\n"
-                " def something():\n"
-                "-    result = some_very_long(a, b, c, d, e, f)\n"
-                "+    result = some_very_long(\n"
-                "+        a, b, c, d, e, f\n"
-                "+    )\n"
+                "--- a/.github/workflows/ci.yml\n"
+                "+++ b/.github/workflows/ci.yml\n"
+                "@@ -3 +3 @@\n"
+                "-  runs-on: ubuntu-latest \n"
+                "+  runs-on: ubuntu-latest\n"
             ),
         )
     raise TypeError(f"unhandled schema in fake LLM: {schema.__name__}")

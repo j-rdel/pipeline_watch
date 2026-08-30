@@ -1,0 +1,12 @@
+{
+  "id": 999999999,
+  "name": "ci.yml",
+  "head_branch": "feature/injection",
+  "head_sha": "cafe1234",
+  "event": "pull_request",
+  "status": "completed",
+  "conclusion": "failure",
+  "run_started_at": "2026-08-30T00:00:00Z",
+  "repository": {"full_name": "j-rdel/pipeline_watch"},
+  "jobs_url": "https://api.github.com/repos/j-rdel/pipeline_watch/actions/runs/999999999/jobs"
+}
