@@ -33,8 +33,10 @@ def test_lint_fixture_routes_to_autofix(graph):
     assert final["decision"] == "autofix"
     assert final["policy_gate_passed"] is True
     assert final["proposed_patch"] is not None
-    assert final["pr_url"] is not None
-    assert final.get("discord_message_id") is None
+    # Both publishers dry-run by default → receipts are None but the branch
+    # was exercised (open_pr wrote pr_url=None to state, not skipped).
+    assert "pr_url" in final and final["pr_url"] is None
+    assert "discord_message_id" not in final
 
     report = final["report"]
     assert isinstance(report, IncidentReport)
@@ -52,7 +54,9 @@ def test_test_failure_fixture_routes_to_notify_only(graph):
     assert final["policy_gate_passed"] is False
     assert final.get("proposed_patch") is None
     assert final.get("pr_url") is None
-    assert final["discord_message_id"] == "stub-msg-0001"
+    # notify_discord ran and wrote the key; value is None in dry-run.
+    assert "discord_message_id" in final
+    assert final["discord_message_id"] is None
 
     report = final["report"]
     assert report.human_approval_required is True
