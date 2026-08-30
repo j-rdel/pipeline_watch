@@ -1,0 +1,11 @@
+2026-08-29T11:00:00.100Z Setup Python 3.12
+2026-08-29T11:00:03.400Z uv run pytest -q
+2026-08-29T11:00:41.001Z tests/test_pricing.py::test_discount_stacks FAILED
+2026-08-29T11:00:41.002Z ================================== FAILURES ===================================
+2026-08-29T11:00:41.003Z _________________________ test_discount_stacks _________________________
+2026-08-29T11:00:41.004Z     def test_discount_stacks():
+2026-08-29T11:00:41.005Z         result = apply_discounts(price=100, coupons=["A10", "B10"])
+2026-08-29T11:00:41.006Z >       assert result == 80
+2026-08-29T11:00:41.007Z E       AssertionError: assert 90 == 80
+2026-08-29T11:00:41.500Z 1 failed in 37.4s
+2026-08-29T11:00:47.000Z Error: Process completed with exit code 1.

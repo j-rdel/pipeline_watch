@@ -58,6 +58,7 @@ class TriageState(TypedDict, total=False):
     run_id: str
     source: str  # "fixture" | "github"
     correlation_id: str
+    repository: str  # "owner/name", only required when source="github"
 
     # --- filled by fetch_run_context ---
     context: RunContext
