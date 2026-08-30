@@ -24,10 +24,7 @@ def _base_state(**overrides) -> dict:
 
 
 def _gate() -> PolicyGate:
-    return PolicyGate(
-        allowlist_paths=[".github/workflows/", "pyproject.toml"],
-        dry_run=True,
-    )
+    return PolicyGate(allowlist_paths=[".github/workflows/", "pyproject.toml"])
 
 
 # ------------------------------------------------------- happy path --

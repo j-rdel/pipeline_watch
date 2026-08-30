@@ -52,9 +52,8 @@ _INJECTION_MARKERS = re.compile(
 
 
 class PolicyGate:
-    def __init__(self, allowlist_paths: list[str], dry_run: bool) -> None:
+    def __init__(self, allowlist_paths: list[str]) -> None:
         self.allowlist_paths = [p for p in allowlist_paths if p]
-        self.dry_run = dry_run
 
     @classmethod
     def from_settings(cls) -> PolicyGate:
@@ -62,7 +61,6 @@ class PolicyGate:
             allowlist_paths=[
                 p.strip() for p in settings.pw_allowlist_paths.split(",") if p.strip()
             ],
-            dry_run=settings.pw_dry_run,
         )
 
     # ---------------------------------------------------------- checks --
