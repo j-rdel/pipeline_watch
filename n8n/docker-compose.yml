@@ -1,0 +1,26 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: pipeline_watch_n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Basic auth (change these before ANY non-local use).
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=change-me
+      # Where n8n will call your local pipeline_watch API from inside the
+      # container. host.docker.internal resolves the host on macOS + Windows;
+      # on Linux add extra_hosts (see below).
+      - PIPELINE_WATCH_URL=http://host.docker.internal:8000
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+    volumes:
+      - n8n_data:/home/node/.n8n
+    extra_hosts:
+      # Linux users: uncomment the next line so host.docker.internal resolves.
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  n8n_data:

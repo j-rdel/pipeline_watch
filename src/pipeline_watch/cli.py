@@ -1,4 +1,4 @@
-"""pipeline_watch CLI — thin wrapper around the LangGraph flow."""
+"""pipeline_watch CLI — thin wrapper around the LangGraph flow + FastAPI serve."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import os
 import uuid
 
 import typer
+import uvicorn
 
 from pipeline_watch.graph import build_graph
 from pipeline_watch.observability import configure, get_logger, get_tracer
@@ -72,6 +73,17 @@ def triage(
         is_flaky=report.flakiness.is_flaky,
     )
     typer.echo(report.model_dump_json(indent=2))
+
+
+@app.command()
+def serve(
+    host: str = typer.Option("0.0.0.0", "--host"),
+    port: int = typer.Option(8000, "--port"),
+) -> None:
+    """Serve the read-only FastAPI endpoints (used by n8n weekly-report flow)."""
+
+    configure(log_level=os.environ.get("PW_LOG_LEVEL", "INFO"))
+    uvicorn.run("pipeline_watch.api:app", host=host, port=port, log_config=None)
 
 
 if __name__ == "__main__":
