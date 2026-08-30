@@ -66,23 +66,24 @@ from pipeline_watch.nodes.persist_incident import persist_incident
 from pipeline_watch.nodes.propose_patch import propose_patch
 from pipeline_watch.nodes.retrieve_runbook import retrieve_runbook
 from pipeline_watch.nodes.synthesize_diagnosis import synthesize_diagnosis
+from pipeline_watch.observability import traced_node
 from pipeline_watch.state import TriageState
 
 
 def build_graph():
     g = StateGraph(TriageState)
 
-    g.add_node("fetch_run_context", fetch_run_context)
-    g.add_node("classify_failure", classify_failure)
-    g.add_node("retrieve_runbook", retrieve_runbook)
-    g.add_node("estimate_flakiness", estimate_flakiness)
-    g.add_node("synthesize_diagnosis", synthesize_diagnosis)
-    g.add_node("decide_action", decide_action)
-    g.add_node("propose_patch", propose_patch)
-    g.add_node("enforce_policy", enforce_policy)
-    g.add_node("open_pr", open_pr)
-    g.add_node("notify_discord", notify_discord)
-    g.add_node("persist_incident", persist_incident)
+    g.add_node("fetch_run_context", traced_node(fetch_run_context))
+    g.add_node("classify_failure", traced_node(classify_failure))
+    g.add_node("retrieve_runbook", traced_node(retrieve_runbook))
+    g.add_node("estimate_flakiness", traced_node(estimate_flakiness))
+    g.add_node("synthesize_diagnosis", traced_node(synthesize_diagnosis))
+    g.add_node("decide_action", traced_node(decide_action))
+    g.add_node("propose_patch", traced_node(propose_patch))
+    g.add_node("enforce_policy", traced_node(enforce_policy))
+    g.add_node("open_pr", traced_node(open_pr))
+    g.add_node("notify_discord", traced_node(notify_discord))
+    g.add_node("persist_incident", traced_node(persist_incident))
 
     g.add_edge(START, "fetch_run_context")
 
