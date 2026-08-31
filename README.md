@@ -12,7 +12,8 @@ estruturado no Discord** para revisão humana.
 
 **Repositório:** https://github.com/j-rdel/pipeline_watch
 **Quadro Kanban:** https://github.com/users/j-rdel/projects/1
-**Vídeo de demonstração:** *(a publicar como YouTube não-listado)*
+**Vídeo de demonstração:** não gravado — ver nota na
+[seção 10](#vídeo-de-demonstração)
 
 ---
 
@@ -489,7 +490,21 @@ Detalhes completos em [`docs/prompts/refinement.md`](./docs/prompts/refinement.m
 
 ### Vídeo de demonstração
 
-*(a publicar como YouTube não-listado)*
+Não gravado. Não tive tempo hábil de produzir o vídeo por conta de
+prioridades profissionais na empresa em que trabalho. Para compensar
+essa ausência, o repositório contém todos os artefatos necessários pra
+que o avaliador reproduza cada cenário localmente:
+
+- **Fluxo happy path e cenário adversarial** reprodutíveis em 1 comando
+  cada (ver [seção 9](#9-cenários-de-uso)).
+- **Evidências reais** de execução contra Ollama em
+  [`docs/evidencias/adversarial_run_ollama.md`](./docs/evidencias/adversarial_run_ollama.md).
+- **Análises geradas por IA** (code review, log analysis) preservadas
+  na íntegra em `docs/qa/` e `docs/devops/`.
+- **Estratégia de testes + teste priorizado** documentados em
+  [`docs/qa/`](./docs/qa/).
+- **Roteiro passo-a-passo do fluxo n8n** em
+  [`docs/low-code/n8n.md`](./docs/low-code/n8n.md).
 
 ---
 
